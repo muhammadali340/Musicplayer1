@@ -1,0 +1,11 @@
+{
+  "android": {
+    "permissions": ["android.permission.FOREGROUND_SERVICE"]
+  },
+  "ios": {
+    "infoPlist": {
+      "UIBackgroundModes": ["audio"]
+    }
+  }
+}
+
