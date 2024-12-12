@@ -10,21 +10,32 @@ workflows:
       cache_paths:
         - $CM_BUILD_DIR/node_modules
     scripts:
+      # Step 1: Install npm dependencies
       - name: Install npm dependencies
         script: |
           npm install
+          
+      # Step 2: Create local.properties dynamically
       - name: Set Android SDK location
         script: |
+          # Ensure the android directory exists and create local.properties
+          mkdir -p "$CM_BUILD_DIR/android"
           echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      
+      # Step 3: Build Android release
       - name: Build Android release
         script: |
           chmod +x android/gradlew
           cd android
           ./gradlew clean
           ./gradlew assembleRelease
+
     artifacts:
+      # Save the APK output
       - android/app/build/outputs/**/*.apk
+
     publishing:
+      # Send an email notification after the build completes
       email:
         recipients:
           - user@example.com
