@@ -6,8 +6,6 @@ workflows:
     environment:
       node: latest
       java: 11
-      android_signing:
-        - keystore_reference
     cache:
       cache_paths:
         - $CM_BUILD_DIR/node_modules
