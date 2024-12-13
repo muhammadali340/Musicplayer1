@@ -21,12 +21,21 @@ buildscript {
 
 allprojects {
     repositories {
-        maven {
-            url(new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim(), "../android"))
+        def reactNativePath = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim())
+        def cliPath = new File(["node", "--print", "require.resolve('@react-native-community/cli-platform-android/package.json')"].execute(null, rootDir).text.trim())
+        
+        if (reactNativePath.exists()) {
+            maven {
+                url(reactNativePath.getParentFile().getAbsolutePath() + "/../android")
+            }
         }
-        maven {
-            url(new File(["node", "--print", "require.resolve('@react-native-community/cli-platform-android/package.json')"].execute(null, rootDir).text.trim(), "../native_modules.gradle"))
+        
+        if (cliPath.exists()) {
+            maven {
+                url(cliPath.getParentFile().getAbsolutePath() + "/../native_modules.gradle")
+            }
         }
+        
         maven {
             url("$rootDir/../node_modules/expo/android/maven")
         }
@@ -34,4 +43,3 @@ allprojects {
         mavenCentral()
     }
 }
-
