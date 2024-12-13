@@ -4,38 +4,40 @@ workflows:
     max_build_duration: 120
     instance_type: mac_mini_m1
     environment:
-      node: 18
+      node: latest
       java: 11
+      android_signing:
+        - keystore_reference
     cache:
       cache_paths:
         - $CM_BUILD_DIR/node_modules
+        - $HOME/.gradle/caches
     scripts:
-      # Step 1: Install npm dependencies
-      - name: Install npm dependencies
+      - name: Install dependencies
         script: |
           npm install
-          
-      # Step 2: Create local.properties dynamically
+          npm install -g expo-cli
       - name: Set Android SDK location
         script: |
-          # Ensure the android directory exists and create local.properties
-          mkdir -p "$CM_BUILD_DIR/android"
           echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
-      
-      # Step 3: Build Android release
+      - name: Set up keystore
+        script: |
+          echo $CM_KEYSTORE | base64 --decode > $CM_BUILD_DIR/android/app/keystore.jks
+          cat >> "$CM_BUILD_DIR/android/key.properties" << EOF
+          storePassword=$CM_KEYSTORE_PASSWORD
+          keyPassword=$CM_KEY_PASSWORD
+          keyAlias=$CM_KEY_ALIAS
+          storeFile=keystore.jks
+          EOF
       - name: Build Android release
         script: |
-          chmod +x android/gradlew
           cd android
-          ./gradlew clean
+          chmod +x gradlew
           ./gradlew assembleRelease
-
     artifacts:
-      # Save the APK output
       - android/app/build/outputs/**/*.apk
-
     publishing:
-      # Send an email notification after the build completes
       email:
         recipients:
           - user@example.com
+
