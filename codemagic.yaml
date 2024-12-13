@@ -10,9 +10,9 @@ workflows:
           npm install
       - name: Clean Gradle Cache
         script: |
-          cd android && gradlew.bat cleanBuildCache || true
+          cd android && ./gradlew cleanBuildCache || true
       - name: Build Android APK
         script: |
-          cd android && gradlew.bat assembleRelease
+          cd android && ./gradlew assembleRelease
     artifacts:
       - build/app/outputs/**/*.apk
