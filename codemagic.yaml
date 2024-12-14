@@ -22,3 +22,8 @@ workflows:
           ./gradlew assembleRelease
     artifacts:
       - build/app/outputs/**/*.apk
+- name: Build Android release
+  script: |
+    cd android
+    chmod +x gradlew
+    ./gradlew assembleRelease --stacktrace
