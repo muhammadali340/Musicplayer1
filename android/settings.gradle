@@ -1,34 +1,19 @@
 rootProject.name = 'AdvancedMusicPlayer'
 
-def resolvePackagePath(packageName) {
-    try {
-        // Resolve the path to the package using Node.js
-        def packagePath = ["node", "--print", "require.resolve('${packageName}/package.json')"].execute(null, rootDir).text.trim()
-        return new File(packagePath)
-    } catch (Exception e) {
-        println("Failed to resolve path for package: ${packageName}")
-        return null
-    }
-}
-
-apply from: new File(resolvePackagePath('expo').getAbsolutePath(), "../scripts/autolinking.gradle")
+apply from: new File(["node", "--print", "require.resolve('expo/package.json')"].execute(null, rootDir).text.trim(), "../scripts/autolinking.gradle")
 useExpoModules()
 
-apply from: new File(resolvePackagePath('@react-native-community/cli-platform-android').getAbsolutePath(), "../native_modules.gradle")
+apply from: new File(["node", "--print", "require.resolve('@react-native-community/cli-platform-android/package.json')"].execute(null, rootDir).text.trim(), "../native_modules.gradle")
 applyNativeModulesSettingsGradle(settings)
 
 include ':app'
 
-includeBuild(new File(resolvePackagePath('react-native-gradle-plugin').getAbsolutePath()).getParentFile())
+includeBuild(new File(["node", "--print", "require.resolve('react-native-gradle-plugin/package.json')"].execute(null, rootDir).text.trim()).getParentFile())
 
 if (settings.hasProperty("newArchEnabled") && settings.newArchEnabled == "true") {
-    def reactAndroidPath = resolvePackagePath('react-native')
-    if (reactAndroidPath != null) {
-        include(":ReactAndroid")
-        project(":ReactAndroid").projectDir = new File(reactAndroidPath, "../ReactAndroid")
-        include(":ReactAndroid:hermes-engine")
-        project(":ReactAndroid:hermes-engine").projectDir = new File(reactAndroidPath, "../ReactAndroid/hermes-engine")
-    } else {
-        println("ReactAndroid path could not be resolved!")
-    }
+    include(":ReactAndroid")
+    project(":ReactAndroid").projectDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim(), "../ReactAndroid")
+    include(":ReactAndroid:hermes-engine")
+    project(":ReactAndroid:hermes-engine").projectDir = new File(["node", "--print", "require.resolve('react-native/package.json')"].execute(null, rootDir).text.trim(), "../ReactAndroid/hermes-engine")
 }
+
