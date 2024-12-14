@@ -1,24 +1,41 @@
 workflows:
-  android:
-    name: Build Android Release APK
-    max_build_duration: 60
+  react-native-android:
+    name: React Native Android
+    max_build_duration: 120
+    instance_type: mac_mini_m1
     environment:
-      node: 16.0.0
+      node: latest
+      java: 11
+    cache:
+      cache_paths:
+        - $CM_BUILD_DIR/node_modules
+        - $HOME/.gradle/caches
     scripts:
       - name: Install dependencies
         script: |
           npm install
-      - name: Set Gradlew Permissions
+          npm install -g expo-cli
+      - name: Set Android SDK location
+        script: |
+          echo "sdk.dir=$ANDROID_SDK_ROOT" > "$CM_BUILD_DIR/android/local.properties"
+      - name: Set up keystore
+        script: |
+          echo $CM_KEYSTORE | base64 --decode > $CM_BUILD_DIR/android/app/keystore.jks
+          cat >> "$CM_BUILD_DIR/android/key.properties" << EOF
+          storePassword=$CM_KEYSTORE_PASSWORD
+          keyPassword=$CM_KEY_PASSWORD
+          keyAlias=$CM_KEY_ALIAS
+          storeFile=keystore.jks
+          EOF
+      - name: Build Android release
         script: |
           cd android
           chmod +x gradlew
-      - name: Clean Gradle Cache
-        script: |
-          cd android
-          ./gradlew cleanBuildCache || true
-      - name: Build Android APK
-        script: |
-          cd android
-          ./gradlew assembleRelease
+          ./gradlew assembleRelease --stacktrace
     artifacts:
-      - build/app/outputs/**/*.apk
+      - android/app/build/outputs/**/*.apk
+    publishing:
+      email:
+        recipients:
+          - user@example.com
+
